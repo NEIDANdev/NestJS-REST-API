@@ -1,13 +1,42 @@
 services:
-  dev-db:
+  db:
     image: postgres:16-alpine
-    ports:
-      - 5434:5432
     environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: postgres
-        POSTGRES_DB: nest
-    networks:
-      - neidandev
-networks:
-  neidandev:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: nest
+    ports:
+      - "5434:5432"                     # host access (optional)
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB -h 127.0.0.1"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: dev                       # use "prod" if you want production
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: postgres
+      DB_PASS: postgres
+      DB_NAME: nest
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./src:/usr/src/app/src          # hot reload
+      - api_node_modules:/usr/src/app/node_modules
+    restart: unless-stopped
+
+volumes:
+  db_data:
+  api_node_modules:
