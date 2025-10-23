@@ -7,28 +7,51 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Post()
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
+  @Post('create')
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
+    await this.categoryService.create(createCategoryDto);
+    return {message: 'Category created successfully'}
   }
 
-  @Get()
-  findAll() {
-    return this.categoryService.findAll();
+  @Get('categories')
+  async findAll() {
+    const categories = await this.categoryService.findAll();
+    return {
+      success: true,
+      categories,
+      message: 'Categories fetched successfully',
+    }
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const category = await this.categoryService.findOne(+id);
+
+    return {
+      success: true,
+      category,
+      message: 'Category fetched successfully',
+    }
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoryService.update(+id, updateCategoryDto);
+  async update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
+    const category = await this.categoryService.update(+id, updateCategoryDto);
+
+    return {
+      success: true,
+      category,
+      message: 'Category updated successfully',
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.categoryService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.categoryService.remove(+id);
+
+    return {
+      success: true,
+      message: 'Category removed successfully',
+    }
   }
 }

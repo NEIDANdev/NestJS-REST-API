@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,28 +10,47 @@ export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private readonly categoryRepository: Repository<Category>
-  ){}
+  ) { }
 
-  create(createCategoryDto: CreateCategoryDto) {
+  async create(createCategoryDto: CreateCategoryDto): Promise<Category> {
+    const { name } = createCategoryDto;
+
+    const existingCategory = await this.categoryRepository.findOne({
+      where: { name }
+    });
+
+    if (existingCategory) {
+      throw new BadRequestException({ message: 'This category already exists' })
+    }
+
     const newCategory = this.categoryRepository.create(createCategoryDto)
-
-    return this.categoryRepository.save(newCategory);
+    return await this.categoryRepository.save(newCategory);
   }
 
-  findAll() {
-    return `This action returns all category`;
+  async findAll(): Promise<Category[]> {
+    return await this.categoryRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOne(id: number): Promise<Category> {
+    const category = await this.categoryRepository.findOneBy({ id });
+
+    if (!category) {
+      throw new BadRequestException({ message: 'Category not found' })
+    }
+
+    return category;
   }
 
-  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    await this.categoryRepository.update(id, updateCategoryDto);
-    return this.categoryRepository.findOne({ where: { id } });
+  async update(id: number, updateCategoryDto: UpdateCategoryDto): Promise<Category> {
+    const category = await this.findOne(id);
+
+    const updateCategory = this.categoryRepository.merge(category, updateCategoryDto);
+    return this.categoryRepository.save(updateCategory)
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  async remove(id: number): Promise<Category> {
+    const category = await this.findOne(id)
+
+    return this.categoryRepository.remove(category)
   }
 }
