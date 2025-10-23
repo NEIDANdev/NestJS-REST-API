@@ -7,28 +7,50 @@ import { UpdateUserDto } from './dto/update-user.dto';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post()
-  create(@Body() createUserDto: CreateUserDto) {
-    return this.userService.create(createUserDto);
+  @Post('create')
+  async create(@Body() createUserDto: CreateUserDto) {
+    await this.userService.create(createUserDto);
+    return {message: 'User created successfully!'}
   }
 
-  @Get()
-  findAll() {
-    return this.userService.findAll();
+  @Get('users')
+  async findAll() {
+    const users = await this.userService.findAll();
+    return {
+      success: true,
+      users,
+      message:  'Users fetched successfully',
+    };
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const user = await this.userService.findOne(+id);
+    return {
+      success: true,
+      user,
+      message: 'User fetched successfully',
+    }
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const updatedUser = await this.userService.update(+id, updateUserDto);
+
+    return {
+      success: true,
+      updatedUser,
+      message: 'User updated successfully',
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.userService.remove(+id);
+
+    return {
+      success: true,
+      message: 'User removed successfully',
+    }
   }
 }
