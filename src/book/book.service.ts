@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -10,28 +10,47 @@ export class BookService {
   constructor(
     @InjectRepository(Book)
     private readonly bookRepository: Repository<Book>
-  ){}
+  ) { }
 
-  create(createBookDto: CreateBookDto) {
+  async create(createBookDto: CreateBookDto): Promise<Book> {
+    const { name } = createBookDto
+
+    const existingBook = await this.bookRepository.findOne({
+      where: { name }
+    });
+
+    if (existingBook) {
+      throw new BadRequestException({ message: 'This book already exists' })
+    }
+
     const newBook = this.bookRepository.create(createBookDto)
-
-    return this.bookRepository.save(newBook);
+    return await this.bookRepository.save(newBook);
   }
 
-  findAll() {
-    return `This action returns all book`;
+  async findAll(): Promise<Book[]> {
+    return await this.bookRepository.find();
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} book`;
+  async findOne(id: number): Promise<Book> {
+    const book = await this.bookRepository.findOneBy({ id });
+
+    if (!book) {
+      throw new BadRequestException({ message: 'Book not found' })
+    }
+
+    return book;
   }
 
-  async update(id: number, updateBookDto: UpdateBookDto) {
-    await this.bookRepository.update(id, updateBookDto);
-    return this.bookRepository.findOne({ where: { id } });
+  async update(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
+    const book = await this.findOne(id);
+
+    const updateBook = this.bookRepository.merge(book, updateBookDto);
+    return this.bookRepository.save(updateBook);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} book`;
+  async remove(id: number): Promise<Book> {
+    const book = await this.findOne(id);
+
+    return this.bookRepository.remove(book);
   }
 }

@@ -5,30 +5,53 @@ import { UpdateBookDto } from './dto/update-book.dto';
 
 @Controller('book')
 export class BookController {
-  constructor(private readonly bookService: BookService) {}
+  constructor(private readonly bookService: BookService) { }
 
-  @Post()
-  create(@Body() createBookDto: CreateBookDto) {
-    return this.bookService.create(createBookDto);
+  @Post('create')
+  async create(@Body() createBookDto: CreateBookDto) {
+    await this.bookService.create(createBookDto);
+    return { message: 'Book created successfully' }
   }
 
-  @Get()
-  findAll() {
-    return this.bookService.findAll();
+  @Get('books')
+  async findAll() {
+    const books = await this.bookService.findAll();
+    return {
+      success: true,
+      books,
+      message: 'Books fetched successfully',
+    }
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.bookService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    const book = await this.bookService.findOne(+id);
+
+    return {
+      success: true,
+      book,
+      message: 'Book fetched successfully',
+    }
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
-    return this.bookService.update(+id, updateBookDto);
+  async update(@Param('id') id: string, @Body() updateBookDto: UpdateBookDto) {
+    const book = await this.bookService.update(+id, updateBookDto);
+
+    return {
+      success: true,
+      book,
+      message: 'Book updated successfully',
+    }
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.bookService.remove(+id);
+  async remove(@Param('id') id: string) {
+    await this.bookService.remove(+id);
+
+    return {
+      success: true,
+      message: 'Book removed successfully',
+    }
   }
 }
