@@ -3,23 +3,21 @@ import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
-@Controller('category')
+@Controller('categories')
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
-  @Post('create')
+  @Post()
   async create(@Body() createCategoryDto: CreateCategoryDto) {
     await this.categoryService.create(createCategoryDto);
     return {message: 'Category created successfully'}
   }
 
-  @Get('categories')
+  @Get()
   async findAll() {
     const categories = await this.categoryService.findAll();
     return {
-      success: true,
-      categories,
-      message: 'Categories fetched successfully',
+      data: categories,
     }
   }
 
@@ -28,9 +26,7 @@ export class CategoryController {
     const category = await this.categoryService.findOne(+id);
 
     return {
-      success: true,
-      category,
-      message: 'Category fetched successfully',
+      data: category,
     }
   }
 
@@ -39,9 +35,7 @@ export class CategoryController {
     const category = await this.categoryService.update(+id, updateCategoryDto);
 
     return {
-      success: true,
-      category,
-      message: 'Category updated successfully',
+      data: category,
     }
   }
 

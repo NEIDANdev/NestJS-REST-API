@@ -3,23 +3,21 @@ import { BookService } from './book.service';
 import { CreateBookDto } from './dto/create-book.dto';
 import { UpdateBookDto } from './dto/update-book.dto';
 
-@Controller('book')
+@Controller('books')
 export class BookController {
   constructor(private readonly bookService: BookService) { }
 
-  @Post('create')
+  @Post()
   async create(@Body() createBookDto: CreateBookDto) {
     await this.bookService.create(createBookDto);
     return { message: 'Book created successfully' }
   }
 
-  @Get('books')
+  @Get()
   async findAll() {
     const books = await this.bookService.findAll();
     return {
-      success: true,
-      books,
-      message: 'Books fetched successfully',
+      data: books,
     }
   }
 
@@ -28,9 +26,7 @@ export class BookController {
     const book = await this.bookService.findOne(+id);
 
     return {
-      success: true,
-      book,
-      message: 'Book fetched successfully',
+      data: book,
     }
   }
 
@@ -39,9 +35,7 @@ export class BookController {
     const book = await this.bookService.update(+id, updateBookDto);
 
     return {
-      success: true,
-      book,
-      message: 'Book updated successfully',
+      data: book,
     }
   }
 
@@ -50,7 +44,6 @@ export class BookController {
     await this.bookService.remove(+id);
 
     return {
-      success: true,
       message: 'Book removed successfully',
     }
   }

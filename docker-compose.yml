@@ -31,7 +31,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "3001:3000"
     volumes:
       - ./src:/usr/src/app/src          # hot reload
       - api_node_modules:/usr/src/app/node_modules

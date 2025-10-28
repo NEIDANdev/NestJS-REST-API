@@ -3,23 +3,21 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
-@Controller('user')
+@Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @Post('create')
+  @Post()
   async create(@Body() createUserDto: CreateUserDto) {
     await this.userService.create(createUserDto);
     return {message: 'User created successfully!'}
   }
 
-  @Get('users')
+  @Get()
   async findAll() {
     const users = await this.userService.findAll();
     return {
-      success: true,
-      users,
-      message:  'Users fetched successfully',
+      data: users,
     };
   }
 
@@ -27,9 +25,7 @@ export class UserController {
   async findOne(@Param('id') id: string) {
     const user = await this.userService.findOne(+id);
     return {
-      success: true,
-      user,
-      message: 'User fetched successfully',
+      data: user,
     }
   }
 
@@ -38,9 +34,7 @@ export class UserController {
     const updatedUser = await this.userService.update(+id, updateUserDto);
 
     return {
-      success: true,
-      updatedUser,
-      message: 'User updated successfully',
+      data: updatedUser,
     }
   }
 
@@ -49,7 +43,6 @@ export class UserController {
     await this.userService.remove(+id);
 
     return {
-      success: true,
       message: 'User removed successfully',
     }
   }
