@@ -16,7 +16,7 @@ import { AppController } from './app.controller';
       password: process.env.DB_PASS ?? 'postgres',
       database: process.env.DB_NAME ?? 'nest',
       autoLoadEntities: true,
-      synchronize: true, // dev only
+      synchronize: false, // dev only
     }),
     AuthModule,
     UserModule,

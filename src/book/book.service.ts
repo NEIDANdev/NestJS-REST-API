@@ -28,11 +28,16 @@ export class BookService {
   }
 
   async findAll(): Promise<Book[]> {
-    return await this.bookRepository.find();
+    return await this.bookRepository.find({
+      relations: ['user'],
+    });
   }
 
   async findOne(id: number): Promise<Book> {
-    const book = await this.bookRepository.findOneBy({ id });
+    const book = await this.bookRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
 
     if (!book) {
       throw new BadRequestException({ message: 'Book not found' })
@@ -42,10 +47,20 @@ export class BookService {
   }
 
   async update(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
-    const book = await this.findOne(id);
+    const book = await this.bookRepository.preload({
+      id,
+      ...updateBookDto,
+      user: updateBookDto.userId ? { id: updateBookDto.userId } as any : undefined,
+    });
 
-    const updateBook = this.bookRepository.merge(book, updateBookDto);
-    return this.bookRepository.save(updateBook);
+    if (!book) throw new BadRequestException({ message: 'Book not found ' });
+
+    await this.bookRepository.save(book);
+
+    return (await this.bookRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    }))!;
   }
 
   async remove(id: number): Promise<Book> {
